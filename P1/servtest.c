@@ -17,7 +17,6 @@ int main() {
     socklen_t longitud = sizeof(direccion);
     pid_t pid;
 
-    // 1. Crear socket
     servidor = socket(AF_INET, SOCK_STREAM, 0);
 
     if (servidor == -1) {
@@ -25,27 +24,22 @@ int main() {
         exit(1);
     }
 
-    // 2. Configurar direccion del servidor
     memset(&direccion, 0, sizeof(direccion));
 
     direccion.sin_family = AF_INET;
     direccion.sin_port = htons(PUERTO);
     direccion.sin_addr.s_addr = INADDR_ANY;
 
-    // Permitir reutilizar el puerto
     int opcion = 1;
     setsockopt(servidor, SOL_SOCKET, SO_REUSEADDR,
                &opcion, sizeof(opcion));
 
-    // 3. Asociar socket al puerto
     if (bind(servidor, (struct sockaddr *)&direccion,
              sizeof(direccion)) == -1) {
         perror("Error en bind");
         close(servidor);
         exit(1);
     }
-
-    // 4. Escuchar conexiones
     if (listen(servidor, 5) == -1) {
         perror("Error en listen");
         close(servidor);
@@ -53,8 +47,6 @@ int main() {
     }
 
     printf("Servidor escuchando en el puerto %d...\n", PUERTO);
-
-    // 5. Esperar clientes continuamente
     while (1) {
 
         cliente = accept(servidor,
@@ -68,7 +60,6 @@ int main() {
 
         printf("Cliente conectado.\n");
 
-        // 6. Crear proceso hijo
         pid = fork();
 
         if (pid == -1) {
@@ -79,7 +70,6 @@ int main() {
 
         if (pid == 0) {
 
-            // PROCESO HIJO
 
             close(servidor);
 
@@ -94,7 +84,6 @@ int main() {
             char buffer[TAM];
             size_t bytes;
 
-            // 7. Enviar archivo al cliente
             while ((bytes = fread(buffer, 1, TAM, archivo)) > 0) {
 
                 size_t enviados = 0;
@@ -125,7 +114,6 @@ int main() {
 
         } else {
 
-            // PROCESO PADRE
 
             close(cliente);
         }
